@@ -4,9 +4,13 @@ from checker import get_desktop, get_active_model
 import subprocess
 import os
 import time
+import uno
+from com.sun.star.beans import PropertyValue
 from GrammarAlert import run_check, decode_errors, \
-    check_sentence, segment
+    check_sentence, markup_errors, select_part
 
+
+@unittest.skip('not testing xml')
 class ATD_XML_Test(unittest.TestCase):
 
     def test_run_check(self):
@@ -84,34 +88,34 @@ class LO_Cursor_Test(unittest.TestCase):
 
     @classmethod
     def setUpClass(self):
-        if 'SOFFICE_BINARY' not in os.environ.keys():
-            raise RuntimeError('Please set environment variable SOFFICE_BINARY to the path to your soffice executable to run these tests.')
-        self.soffice = subprocess.Popen(
-            '{} --accept="socket,host=localhost,port=2002;urp;" --norestore --nologo --nodefault --headless "test_doc.odt"'.format(os.environ['SOFFICE_BINARY']),
-            shell=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
-        )
-        self.desktop = None
-        start = time.time()
-        while self.desktop is None and time.time() - start < 30:
-            print(time.time() - start)
-            try:
-                self.desktop = get_desktop()
-            except Exception as e:
-                print(e)
-                time.sleep(5)
-        if self.desktop is None:
-            raise RuntimeError('Unable to connect to soffice')
+        self.desktop = get_desktop()
         self.model = get_active_model(self.desktop)
 
     def test_segments_match_cursor(self):
-        print('sm', self.model)
+        tenum = self.model.Text.createEnumeration()
+        # the third sentence of test_doc.odt has errors
+        firsttext = tenum.nextElement()
+        firsttext = tenum.nextElement()
+        firsttext = tenum.nextElement()
+        cur = firsttext.getText().createTextCursor()
+        sentence = firsttext.getString()
+        errors = check_sentence(sentence)
+        erroot = errors.getroot()
+        markups = markup_errors(sentence, erroot)
+        for m in markups:
+            print(m)
+        #print('markups', markups)
+        #cur = select_part(cur, parts[0])
+        #print(parts[0][1], cur.getString())
 
     @classmethod
-    def tearDownClass(self):
-        if not self.soffice.poll():
+    def XtearDownClass(self):
+        self.model.dispose()
+        if self.desktop is not None:
+            self.desktop.dispose()
+        if self.soffice is not None:
             self.soffice.terminate()
+            self.soffice.communicate()
 
 if __name__=='__main__':
     unittest.main()
