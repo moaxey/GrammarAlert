@@ -71,9 +71,11 @@ def markup_errors(sentence, erroot):
             raise RuntimeError('String "{}" not found in "{}"'.format(
                 errstring, sentence
             ))
-        if match.span() in [(n[0], n[1]) for n in markups]:
-            match = re.search(errstring, sentence[match.end():])
-        markups.append((match.start(), match.end(), error))
+        mend = 0
+        while match.span() in [(n[0], n[1]) for n in markups]:
+            mend += match.end()
+            match = re.search(errstring, sentence[mend:])
+        markups.append((match.start() + mend, match.end() + mend, error))
         markups = sorted(markups, key=lambda x: x[0])
     return markups
 

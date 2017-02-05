@@ -91,22 +91,19 @@ class LO_Cursor_Test(unittest.TestCase):
         self.desktop = get_desktop()
         self.model = get_active_model(self.desktop)
 
-    def test_segments_match_cursor(self):
+    def test_markup(self):
         tenum = self.model.Text.createEnumeration()
         # the third sentence of test_doc.odt has errors
-        firsttext = tenum.nextElement()
-        firsttext = tenum.nextElement()
-        firsttext = tenum.nextElement()
-        cur = firsttext.getText().createTextCursor()
-        sentence = firsttext.getString()
+        testtext = tenum.nextElement()
+        testtext = tenum.nextElement()
+        testtext = tenum.nextElement()
+        sentence = testtext.getString()
         errors = check_sentence(sentence)
         erroot = errors.getroot()
         markups = markup_errors(sentence, erroot)
         for m in markups:
-            print(m)
-        #print('markups', markups)
-        #cur = select_part(cur, parts[0])
-        #print(parts[0][1], cur.getString())
+            mtext = next(m[2].iter(tag='string')).text
+            self.assertEqual(sentence[m[0]:m[1]], mtext)
 
     @classmethod
     def XtearDownClass(self):
