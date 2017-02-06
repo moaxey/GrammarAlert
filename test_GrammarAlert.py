@@ -6,11 +6,10 @@ import os
 import time
 import uno
 from com.sun.star.beans import PropertyValue
-from GrammarAlert import run_check, decode_errors, \
-    check_sentence, markup_errors, select_part
+from GrammarAlert import run_check, decode_errors, markup_document, \
+    check_sentence, markup_errors, select_markup, highlight_error
 
-
-@unittest.skip('not testing xml')
+#@unittest.skip('not testing xml')
 class ATD_XML_Test(unittest.TestCase):
 
     def test_run_check(self):
@@ -22,14 +21,12 @@ class ATD_XML_Test(unittest.TestCase):
 </results>"""
         )
         errors = decode_errors(response)
-        erroot = errors.getroot()
         self.assertEqual(
-            len(erroot), 0
+            len(errors), 0
         )
         cerrors = check_sentence(sentence)
-        cerroot = cerrors.getroot()
         self.assertEqual(
-            ET.tostring(erroot), ET.tostring(cerroot)
+            errors, cerrors
         )
 
     def test_run_check_segment(self):
@@ -50,40 +47,45 @@ class ATD_XML_Test(unittest.TestCase):
 </results>"""
         )
         errors = decode_errors(response)
-        erroot = errors.getroot()
         self.assertEqual(
-            len(erroot), 1
+            len(errors), 1
         )
-        for e in erroot:
-            self.assertEqual(e.tag, 'error')
-            if e.tag == 'error':
-                for t in e:
-                    self.assertTrue(
-                        t.tag in (
-                            'string',
-	                    'description',
-	                    'precontext',
-	                    'type',
-	                    'url'
-                        )
+        for e in errors:
+            self.assertEqual(type(e).__name__, 'dict')
+            for t in e.keys():
+                self.assertTrue(
+                    t in (
+                        'string',
+	                'description',
+	                'precontext',
+	                'type',
+	                'url',
+                        'options',
                     )
-        segments = segment(sentence, erroot)
+                )
+        markups = markup_errors(sentence, errors)
         self.assertEqual(
-            segments[0],
-            (None, 'It ', None)
+            markups[0][:2],
+            (3, 24)
         )
+        expected_values = {
+            'type': 'grammar',
+            'string': 'was determined by the',
+            'options': [],
+            'description': 'Passive voice',
+            'url': 'http://127.0.0.1:1049/info.slp?text=was+determined+by+the&tags=VBD%2FVBN%2FIN%2FDT&engine=3'
+        }
         self.assertEqual(
-            segments[1],
-            ('grammar', 'was determined by the', 'http://127.0.0.1:1049/info.slp?text=was+determined+by+the&tags=VBD%2FVBN%2FIN%2FDT&engine=3')
+            sorted(markups[0][2].keys()),
+            sorted(expected_values.keys())
         )
-        self.assertEqual(
-            segments[2],
-            (None,
-             ' committee that the report was inconclusive',
-             None
+        for key in expected_values.keys():
+            self.assertEqual(
+                markups[0][2][key],
+                expected_values[key]
             )
-        )
 
+#@unittest.skip('not testing cursor')
 class LO_Cursor_Test(unittest.TestCase):
 
     @classmethod
@@ -92,27 +94,8 @@ class LO_Cursor_Test(unittest.TestCase):
         self.model = get_active_model(self.desktop)
 
     def test_markup(self):
-        tenum = self.model.Text.createEnumeration()
-        # the third sentence of test_doc.odt has errors
-        testtext = tenum.nextElement()
-        testtext = tenum.nextElement()
-        testtext = tenum.nextElement()
-        sentence = testtext.getString()
-        errors = check_sentence(sentence)
-        erroot = errors.getroot()
-        markups = markup_errors(sentence, erroot)
-        for m in markups:
-            mtext = next(m[2].iter(tag='string')).text
-            self.assertEqual(sentence[m[0]:m[1]], mtext)
+        markup_document(self.desktop, self.model)
 
-    @classmethod
-    def XtearDownClass(self):
-        self.model.dispose()
-        if self.desktop is not None:
-            self.desktop.dispose()
-        if self.soffice is not None:
-            self.soffice.terminate()
-            self.soffice.communicate()
 
 if __name__=='__main__':
     unittest.main()
