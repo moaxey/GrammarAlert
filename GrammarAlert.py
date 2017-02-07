@@ -95,17 +95,21 @@ class Alerter():
         """ markup an ordered list of the errors: start, end, error """
         markups = []
         for error in errdict:
+            er_markups = []
             match = re.search(error['string'], sentence)
             if match is None:
                 raise RuntimeError('String "{}" not found in "{}"'.format(
                     error['string'], sentence
                 ))
             mend = 0
-            while match.span() in [(n[0], n[1]) for n in markups]:
-                mend += match.end()
+            while match.span() in [(n[0], n[1]) for n in er_markups]:
+                mend = match.end()
                 match = re.search(error['string'], sentence[mend:])
-            markups.append((match.start() + mend, match.end() + mend, error))
-            markups = sorted(markups, key=lambda x: x[0])
+            er_markups.append(
+                (match.start() + mend, match.end() + mend, error)
+            )
+            markups += er_markups
+        markups = sorted(markups, key=lambda x: x[0])
         return markups
 
     def highlight_error(self, cursor, error):
