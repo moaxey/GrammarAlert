@@ -1,16 +1,15 @@
 GrammarAlert
 ============
 
-A simple macro for LibreOffice to highlight errors with suggestions and links to
-explanations provided by the open source [After the deadline
-(ATD)](https://open.afterthedeadline.com/) language checking service. This macro
-is hard-coded to use that server on localhost.
+A simple macro for LibreOffice to highlight errors with suggestions and links 
+to explanations provided by the open source After the deadline (ATD) language 
+checking service. This macro is hard-coded to use that server on localhost.
 
 There is an unmaintained java-based LibreOffice extension which I'm sure is
 better than this software, but does not work with LibreOffice 5+ called
 [atd-openoffice](https://github.com/Automattic/atd-openoffice.git).
 
-Tested in LibreOffice 5.1 and 5.3dev.
+Tested in LibreOffice 5.2 and 5.3dev.
 
 Installation
 ------------
@@ -19,6 +18,8 @@ Copy the GrammarAlert.py script to your LibreOffice python scripts folder. The
 site varies per platform. For example, OSX and in recent nightly build:
 
 >   /Applications/LibreOfficedev.app/Contents/Resources/Scripts/python/
+
+Install and run the [ATD server](https://open.afterthedeadline.com/)
 
 Usage
 -----
