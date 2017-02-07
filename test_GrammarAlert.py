@@ -6,32 +6,36 @@ import os
 import time
 import uno
 from com.sun.star.beans import PropertyValue
-from GrammarAlert import run_check, decode_errors, markup_document, \
-    check_sentence, markup_errors, select_markup, highlight_error
+from GrammarAlert import Alerter
+
+# run_check, decode_errors, markup_document, \
+#    check_sentence, markup_errors, select_markup, highlight_error
 
 #@unittest.skip('not testing xml')
 class ATD_XML_Test(unittest.TestCase):
 
     def test_run_check(self):
+        a = Alerter()
         sentence = '“This is a sentence”'
-        response = run_check(sentence)
+        response = a.run_check(sentence)
         self.assertEqual(
             response,
             """<results>
 </results>"""
         )
-        errors = decode_errors(response)
+        errors = a.decode_errors(response)
         self.assertEqual(
             len(errors), 0
         )
-        cerrors = check_sentence(sentence)
+        cerrors = a.check_sentence(sentence)
         self.assertEqual(
             errors, cerrors
         )
 
     def test_run_check_segment(self):
+        a = Alerter()
         sentence = 'It was determined by the committee that the report was inconclusive'
-        response = run_check(sentence)
+        response = a.run_check(sentence)
         self.assertEqual(
             response,
             """<results>
@@ -46,7 +50,7 @@ class ATD_XML_Test(unittest.TestCase):
   </error>
 </results>"""
         )
-        errors = decode_errors(response)
+        errors = a.decode_errors(response)
         self.assertEqual(
             len(errors), 1
         )
@@ -63,7 +67,7 @@ class ATD_XML_Test(unittest.TestCase):
                         'options',
                     )
                 )
-        markups = markup_errors(sentence, errors)
+        markups = a.markup_errors(sentence, errors)
         self.assertEqual(
             markups[0][:2],
             (3, 24)
@@ -94,7 +98,8 @@ class LO_Cursor_Test(unittest.TestCase):
         self.model = get_active_model(self.desktop)
 
     def test_markup(self):
-        markup_document(self.desktop, self.model)
+        a = Alerter()
+        a.markup_document(self.desktop, self.model)
 
 
 if __name__=='__main__':
