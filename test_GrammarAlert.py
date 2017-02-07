@@ -1,11 +1,6 @@
 import unittest
 from xml.etree import ElementTree as ET
 from checker import get_desktop, get_active_model
-import subprocess
-import os
-import time
-import uno
-from com.sun.star.beans import PropertyValue
 from GrammarAlert import Alerter
 
 #@unittest.skip('not testing xml')
