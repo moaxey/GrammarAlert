@@ -125,6 +125,7 @@ class Alerter():
 
     def simplify_characters_for_url(self, string):
         string = string.replace('’', "'")
+        string = string.replace(' ', ' ')
         string = re.sub(r'[”“]', '"', string)
         return string
 
