@@ -1,5 +1,12 @@
 import uno
 
+"""
+>>> from checker import *
+>>> desktop = get_desktop()
+>>> model = get_active_model(desktop)
+
+"""
+
 def get_desktop():
     localContext = uno.getComponentContext()
     resolver = localContext.ServiceManager.createInstanceWithContext(
@@ -15,9 +22,4 @@ def get_desktop():
 def get_active_model(desktop):
     desktop.setActiveFrame(desktop.getFrames()[0])
     return desktop.getCurrentComponent()
-"""
->>> from checker import *
->>> desktop = get_desktop()
->>> model = get_active_model(desktop)
 
-"""
