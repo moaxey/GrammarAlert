@@ -8,9 +8,6 @@ import uno
 from com.sun.star.beans import PropertyValue
 from GrammarAlert import Alerter
 
-# run_check, decode_errors, markup_document, \
-#    check_sentence, markup_errors, select_markup, highlight_error
-
 #@unittest.skip('not testing xml')
 class ATD_XML_Test(unittest.TestCase):
 
