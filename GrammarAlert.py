@@ -118,6 +118,7 @@ class Alerter():
         cursor.setPropertyValue("CharBackColor", COLOURS[error['type']])
         if 'url' in error.keys() and error['url'] is not None:
             cursor.HyperLinkURL = error['url']
+            cursor.HyperLinkName = 'GrammarAlert'
         insert_at = cursor.End
         if 'options' in error.keys() and len(error['options']) > 0:
             insert_at = insert_at.End
@@ -128,6 +129,32 @@ class Alerter():
         string = string.replace(' ', ' ')
         string = re.sub(r'[”“]', '"', string)
         return string
+
+    def clear_markups(self, desktop, model):
+        cursor = model.Text.createTextCursor()
+        charbuf = []
+        insert_count = 0
+        while cursor.goRight(1, EXTEND):
+            charcol = cursor.getPropertyValue("CharBackColor")
+            if charcol in [n[1] for n in list(COLOURS.items())]:
+                cursor.setPropertyToDefault("CharBackColor")
+                thischar = cursor.getString()
+                popped = None
+                if len(charbuf) > 0:
+                    insert_count += 1
+                if thischar == '<':
+                    charbuf.append('<')
+                elif thischar == '>':
+                    popped = charbuf.pop()
+                if popped and len(charbuf) == 0:
+                    cursor.collapseToEnd()
+                    cursor.goLeft(insert_count + 1, EXTEND)
+                    cursor.setString('')
+                    insert_count = 0
+            if cursor.HyperLinkName == 'GrammarAlert':
+                cursor.HyperLinkName = ''
+                cursor.HyperLinkURL = ''
+            cursor.collapseToEnd()
 
     def markup_document(self, desktop, model):
         if not hasattr(model, "Text"):
@@ -151,3 +178,10 @@ def check():
     model = desktop.getCurrentComponent()
     a = Alerter()
     a.markup_document(desktop, model)
+
+def clear_markups():
+    """ Highlight grammar errors """
+    desktop = XSCRIPTCONTEXT.getDesktop()
+    model = desktop.getCurrentComponent()
+    a = Alerter()
+    a.clear_markups(desktop, model)

@@ -92,6 +92,7 @@ class LO_Cursor_Test(unittest.TestCase):
     def test_markup(self):
         a = Alerter()
         a.markup_document(self.desktop, self.model)
+        a.clear_markups(self.desktop, self.model)
 
 
 if __name__=='__main__':
